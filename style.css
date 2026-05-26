@@ -1803,3 +1803,927 @@ a {
     font-size: 0.8rem;
   }
 }
+
+/* ===== ADDITIONAL ANIMATIONS & TILT ===== */
+#hero-canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.tilt-card {
+  transform-style: preserve-3d;
+  will-change: transform;
+  transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.5s ease, border-color 0.3s ease;
+}
+
+/* Staggered entry animation delays */
+.category-card:nth-child(1) { transition-delay: 0.05s; }
+.category-card:nth-child(2) { transition-delay: 0.15s; }
+.category-card:nth-child(3) { transition-delay: 0.25s; }
+.category-card:nth-child(4) { transition-delay: 0.35s; }
+
+/* Continuous linear gradient animation on hero title line 2 */
+.hero-title .line-2 {
+  background: linear-gradient(90deg, var(--primary-color), var(--danger-color), var(--accent-color), var(--primary-color));
+  background-size: 300% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: shine-text 6s linear infinite;
+}
+
+@keyframes shine-text {
+  to { background-position: 300% center; }
+}
+
+/* ========================================================
+   CINEMATIC HOME — PRELOADER
+   ======================================================== */
+#preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-color);
+  transition: opacity 0.5s ease;
+}
+
+.preloader-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.preloader-ring {
+  width: 48px;
+  height: 48px;
+  border: 2px solid var(--border-color);
+  border-top-color: var(--primary-color);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.preloader-logo {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  background: linear-gradient(90deg, var(--primary-color), var(--accent-color));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.preloader-logo span {
+  -webkit-text-fill-color: var(--accent-color);
+}
+
+/* ========================================================
+   CINEMATIC HOME — CUSTOM CURSOR
+   ======================================================== */
+.cursor-follower {
+  position: fixed;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--primary-color);
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 9998;
+  mix-blend-mode: difference;
+  will-change: transform;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+body:hover .cursor-follower {
+  opacity: 1;
+}
+
+/* ========================================================
+   CINEMATIC HOME — HERO SECTION
+   ======================================================== */
+.hero-section {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--bg-color);
+}
+
+.hero-gradient-layer {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(40,116,240,0.12) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,229,0,0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 20% 60%, rgba(251,100,27,0.05) 0%, transparent 50%);
+  will-change: transform;
+}
+
+body.dark-theme .hero-gradient-layer {
+  background:
+    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(56,189,248,0.15) 0%, transparent 70%),
+    radial-gradient(ellipse 60% 40% at 80% 80%, rgba(255,229,0,0.08) 0%, transparent 60%),
+    radial-gradient(ellipse 50% 50% at 20% 60%, rgba(249,115,22,0.06) 0%, transparent 50%);
+}
+
+.hero-noise-overlay {
+  position: absolute;
+  inset: 0;
+  opacity: 0.035;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 200px 200px;
+  pointer-events: none;
+}
+
+.hero-three {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.hero-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.12;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.orb-1 {
+  width: 400px;
+  height: 400px;
+  background: var(--primary-color);
+  top: -5%;
+  right: -5%;
+  animation: orbFloat 20s ease-in-out infinite;
+}
+
+.orb-2 {
+  width: 300px;
+  height: 300px;
+  background: var(--accent-color);
+  bottom: 10%;
+  left: -5%;
+  animation: orbFloat 25s ease-in-out infinite reverse;
+}
+
+.orb-3 {
+  width: 200px;
+  height: 200px;
+  background: var(--danger-color);
+  top: 40%;
+  left: 30%;
+  animation: orbFloat 18s ease-in-out infinite 5s;
+}
+
+@keyframes orbFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(30px, -30px) scale(1.1); }
+  66% { transform: translate(-20px, 20px) scale(0.95); }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+  max-width: 900px;
+  padding: 2rem;
+  will-change: transform;
+}
+
+.hero-tagline-wrap {
+  overflow: hidden;
+  margin-bottom: 1.5rem;
+  display: flex;
+  justify-content: center;
+}
+
+.hero-tagline {
+  display: inline-block;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 4px;
+  color: var(--primary-color);
+  padding: 0.5rem 1.5rem;
+  border: 1px solid var(--border-color);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.03);
+}
+
+body.dark-theme .hero-tagline {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(255,255,255,0.1);
+}
+
+.hero-title {
+  font-size: clamp(2.8rem, 7vw, 6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -3px;
+  margin-bottom: 1.5rem;
+  color: var(--text-color);
+}
+
+.hero-line {
+  display: block;
+  overflow: hidden;
+}
+
+.hero-line span {
+  display: block;
+  will-change: transform;
+}
+
+.hero-line:nth-child(2) span {
+  background: linear-gradient(135deg, var(--primary-color), var(--danger-color), var(--accent-color));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: heroGradient 8s ease infinite;
+}
+
+@keyframes heroGradient {
+  0%, 100% { background-position: 0% center; }
+  50% { background-position: 100% center; }
+}
+
+.hero-sub {
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: var(--text-muted);
+  line-height: 1.7;
+  max-width: 600px;
+  margin: 0 auto 2.5rem;
+  font-weight: 400;
+  letter-spacing: 0.2px;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 1.2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn-hero {
+  position: relative;
+  padding: 0.9rem 2.2rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  border-radius: 100px;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  will-change: transform;
+}
+
+.btn-hero-primary {
+  background: var(--primary-color);
+  color: #fff;
+  box-shadow: 0 4px 20px rgba(40,116,240,0.3);
+}
+
+.btn-hero-primary:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 30px rgba(40,116,240,0.45);
+}
+
+.btn-hero-outline {
+  background: transparent;
+  color: var(--text-color);
+  border: 1.5px solid var(--border-color);
+  backdrop-filter: blur(10px);
+}
+
+.btn-hero-outline:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+  transform: translateY(-3px);
+}
+
+.hero-scroll {
+  position: absolute;
+  bottom: 2.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+.hero-scroll-text {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+.hero-scroll-line {
+  width: 1px;
+  height: 40px;
+  background: var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-scroll-line span {
+  position: absolute;
+  top: -100%;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-color);
+  animation: scrollLine 2s ease-in-out infinite;
+}
+
+@keyframes scrollLine {
+  0% { top: -100%; }
+  50% { top: 100%; }
+  100% { top: 100%; }
+}
+
+.hero-side-text {
+  position: absolute;
+  right: 2rem;
+  top: 50%;
+  transform: translateY(-50%) rotate(90deg);
+  transform-origin: center;
+  font-size: 0.7rem;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.3;
+  z-index: 2;
+  white-space: nowrap;
+}
+
+/* ========================================================
+   CINEMATIC HOME — MARQUEE
+   ======================================================== */
+.marquee-section {
+  padding: 2rem 0;
+  overflow: hidden;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  background: var(--card-bg);
+}
+
+.marquee-track {
+  display: flex;
+  white-space: nowrap;
+  will-change: transform;
+}
+
+.marquee-content {
+  display: flex;
+  gap: 3rem;
+  padding: 0 1.5rem;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.marquee-content span {
+  font-size: 1rem;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  opacity: 0.7;
+}
+
+.marquee-content span:nth-child(even) {
+  color: var(--primary-color);
+  opacity: 0.3;
+  font-size: 0.5rem;
+}
+
+/* ========================================================
+   CINEMATIC HOME — SECTION STYLING
+   ======================================================== */
+.section-sticky-header {
+  text-align: center;
+  margin-bottom: 3rem;
+}
+
+.section-number {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--primary-color);
+  margin-bottom: 0.75rem;
+  font-family: 'Inter', monospace;
+}
+
+.section-label {
+  display: inline-block;
+  padding: 0.35rem 1rem;
+  background: rgba(40,116,240,0.06);
+  color: var(--primary-color);
+  font-weight: 600;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  border-radius: 100px;
+  margin-bottom: 1rem;
+}
+
+body.dark-theme .section-label {
+  background: rgba(56,189,248,0.08);
+}
+
+.section-heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  color: var(--text-color);
+}
+
+.section-desc {
+  color: var(--text-muted);
+  font-size: 1.05rem;
+  max-width: 500px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* ========================================================
+   CINEMATIC HOME — CATEGORIES GLASSMORPHISM
+   ======================================================== */
+.categories-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 1.5rem;
+}
+
+.category-card {
+  position: relative;
+  padding: 3rem 2rem;
+  text-align: center;
+  border-radius: 20px;
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  overflow: hidden;
+  cursor: pointer;
+  transform-style: preserve-3d;
+  perspective: 800px;
+  transition: border-color 0.3s ease;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+  backdrop-filter: blur(10px);
+}
+
+body.dark-theme .category-card {
+  background: rgba(30, 41, 59, 0.6);
+  border-color: rgba(255,255,255,0.06);
+}
+
+.category-card::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 20px;
+  padding: 1px;
+  background: linear-gradient(135deg, var(--primary-color), transparent, var(--accent-color));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  pointer-events: none;
+}
+
+.category-card:hover::before {
+  opacity: 1;
+}
+
+.category-card-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 0%, rgba(40,116,240,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.category-card-shine {
+  position: absolute;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  will-change: left, top;
+}
+
+body.dark-theme .category-card-shine {
+  background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+}
+
+.category-icon {
+  font-size: 2.8rem;
+  margin-bottom: 1rem;
+  display: inline-block;
+  position: relative;
+  z-index: 1;
+}
+
+.category-card h3 {
+  font-size: 1.2rem;
+  font-weight: 700;
+  margin-bottom: 0.5rem;
+  position: relative;
+  z-index: 1;
+  color: var(--text-color);
+}
+
+.category-card p {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* ========================================================
+   CINEMATIC HOME — PRODUCT CARDS GLARE
+   ======================================================== */
+.product-img-glare {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  background: radial-gradient(circle at center, rgba(255,255,255,0.2) 0%, transparent 70%);
+  will-change: left, top;
+}
+
+.home-card {
+  transform-style: preserve-3d;
+  perspective: 1200px;
+}
+
+.home-card .img-wrap {
+  position: relative;
+  overflow: hidden;
+}
+
+.home-card .img-wrap img {
+  will-change: transform;
+}
+
+/* ========================================================
+   CINEMATIC HOME — STORY SECTION
+   ======================================================== */
+.story-section {
+  padding: 6rem 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+  position: relative;
+}
+
+.story-sticky {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.story-content {
+  position: relative;
+}
+
+.story-heading {
+  font-size: clamp(2.5rem, 5vw, 4rem);
+  font-weight: 900;
+  letter-spacing: -2px;
+  line-height: 1.1;
+  margin: 1rem 0 1.5rem;
+  color: var(--text-color);
+}
+
+.story-heading span {
+  background: linear-gradient(135deg, var(--primary-color), var(--danger-color));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-position: 0% center;
+}
+
+.story-text {
+  font-size: 1.05rem;
+  line-height: 1.8;
+  color: var(--text-muted);
+  margin-bottom: 2.5rem;
+  max-width: 480px;
+}
+
+.story-stats {
+  display: flex;
+  gap: 2.5rem;
+}
+
+.story-stat {
+  display: flex;
+  flex-direction: column;
+}
+
+.story-stat-num {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--text-color);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 0.35rem;
+}
+
+.story-stat-label {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.story-visual {
+  position: relative;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.story-visual-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.story-shape {
+  position: absolute;
+  border-radius: 50%;
+  border: 1.5px solid var(--border-color);
+  will-change: transform;
+}
+
+.story-shape:nth-child(1) {
+  width: 320px;
+  height: 320px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: var(--primary-color);
+  opacity: 0.15;
+}
+
+.story-shape:nth-child(2) {
+  width: 220px;
+  height: 220px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border-color: var(--accent-color);
+  opacity: 0.1;
+}
+
+.story-shape:nth-child(3) {
+  width: 120px;
+  height: 120px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--primary-color);
+  opacity: 0.04;
+  border: none;
+}
+
+/* ========================================================
+   CINEMATIC HOME — STATS SVG ICONS
+   ======================================================== */
+.stat-icon svg {
+  width: 40px;
+  height: 40px;
+  color: var(--primary-color);
+}
+
+.stat-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 2rem;
+}
+
+.stat-number {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--text-color);
+  letter-spacing: -1.5px;
+  line-height: 1;
+}
+
+.stat-label {
+  font-weight: 500;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ========================================================
+   CINEMATIC HOME — NEWSLETTER ENHANCED
+   ======================================================== */
+.newsletter-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  background: linear-gradient(135deg, var(--navbar-bg), rgba(27,95,201,0.9));
+  padding: 5rem 2rem;
+  text-align: center;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+body.dark-theme .newsletter-card {
+  background: linear-gradient(135deg, #1e1b4b, rgba(30,41,59,0.9));
+}
+
+.newsletter-bg {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(255,255,255,0.05) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(255,229,0,0.06) 0%, transparent 50%);
+  pointer-events: none;
+  will-change: transform;
+}
+
+.newsletter-content {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+}
+
+.newsletter-heading {
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 900;
+  letter-spacing: -1.5px;
+  margin-bottom: 0.75rem;
+}
+
+.newsletter-text {
+  opacity: 0.7;
+  max-width: 450px;
+  margin: 0 auto 2rem;
+  line-height: 1.6;
+  font-size: 1.05rem;
+}
+
+.newsletter-input-wrap {
+  display: flex;
+  max-width: 450px;
+  margin: 0 auto;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 100px;
+  padding: 0.35rem;
+  overflow: hidden;
+  backdrop-filter: blur(10px);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.newsletter-input-wrap:focus-within {
+  border-color: rgba(255,255,255,0.4);
+  box-shadow: 0 0 20px rgba(255,255,255,0.06);
+}
+
+.newsletter-input-wrap input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  color: #fff;
+  font-size: 0.95rem;
+  outline: none;
+}
+
+.newsletter-input-wrap input::placeholder {
+  color: rgba(255,255,255,0.5);
+}
+
+.btn-newsletter {
+  background: #fff;
+  color: var(--primary-color);
+  font-weight: 700;
+  padding: 0.75rem 1.75rem;
+  border-radius: 100px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+}
+
+.btn-newsletter:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 15px rgba(255,255,255,0.2);
+}
+
+/* ========================================================
+   CINEMATIC HOME — RESPONSIVE
+   ======================================================== */
+@media (max-width: 992px) {
+  .story-sticky {
+    grid-template-columns: 1fr;
+    gap: 3rem;
+  }
+
+  .story-visual {
+    height: 350px;
+  }
+
+  .hero-side-text {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .hero-title {
+    letter-spacing: -1.5px;
+  }
+
+  .hero-side-text {
+    display: none;
+  }
+
+  .story-stats {
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  .story-stat-num {
+    font-size: 2rem;
+  }
+
+  .newsletter-card {
+    padding: 3rem 1.5rem;
+  }
+
+  .newsletter-input-wrap {
+    flex-direction: column;
+    border-radius: 16px;
+    gap: 0.5rem;
+    padding: 0.5rem;
+  }
+
+  .btn-newsletter {
+    width: 100%;
+  }
+
+  .cursor-follower {
+    display: none;
+  }
+
+  .section-heading {
+    font-size: 2rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-actions {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn-hero {
+    width: 100%;
+    max-width: 280px;
+    justify-content: center;
+  }
+}
