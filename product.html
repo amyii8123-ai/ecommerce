@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product Detail - ShopHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="home.html" class="logo">Shop<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search for products...">
+      <button onclick="window.location.href='index.html'">Search</button>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="home.html">Home</a>
+      <a href="index.html">Products</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count-nav">0</span>)</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="message"></div>
+    <a href="index.html" style="color:#2874f0;font-size:0.9rem;margin-bottom:1rem;display:inline-block;transition:transform 0.2s ease;" onmouseover="this.style.transform='translateX(-4px)'" onmouseout="this.style.transform='translateX(0)'">&larr; Back to Products</a>
+    <div id="product-detail" class="product-detail fade-in">
+      <div class="loading loading-dots">Loading product details</div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 ShopHub. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    async function loadProduct() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get('id');
+      if (!id) { document.getElementById('product-detail').innerHTML = '<div class="empty-state"><h2>Product not found</h2></div>'; return; }
+
+      const container = document.getElementById('product-detail');
+      try {
+        const p = await getProduct(id);
+        container.innerHTML = `
+          <div class="detail-image">
+            <div class="img-wrap" style="border-radius:4px;overflow:hidden;">
+              <img src="${p.image}" alt="${p.name}" onerror="this.src='https://via.placeholder.com/450?text=No+Image'" style="transition:transform 0.5s ease;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+            </div>
+          </div>
+          <div class="detail-info">
+            <h1>${p.name}</h1>
+            <div class="detail-price">${formatPrice(p.price)}</div>
+            <div class="stock-badge ${p.inStock ? 'in-stock' : 'out-of-stock'}" style="margin-bottom:0.8rem;">
+              <span class="stock-dot ${p.inStock ? 'in-stock' : 'out-of-stock'}"></span>
+              ${p.inStock ? 'In Stock' : 'Out of Stock'}
+            </div>
+            <div class="detail-rating">
+              <span class="stars" style="background:#388e3c;color:#fff;padding:0.15rem 0.5rem;border-radius:3px;font-size:0.85rem;">${p.rating} ★</span>
+              ${getStarHTML(p.rating)}
+            </div>
+            <div class="detail-desc">${p.description}</div>
+            <div class="qty-selector">
+              <label>Qty:</label>
+              <input type="number" id="qty-input" value="1" min="1" max="10">
+            </div>
+            <button class="btn-primary" onclick="addToCartHandler(${p.id})" ${p.inStock ? '' : 'disabled'}>
+              ${p.inStock ? 'Add to Cart' : 'Out of Stock'}
+            </button>
+          </div>
+        `;
+      } catch {
+        container.innerHTML = '<div class="empty-state"><h2>Error loading product</h2></div>';
+      }
+    }
+
+    async function addToCartHandler(productId) {
+      const user = getCurrentUser();
+      if (!user) { window.location.href = 'login.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search); return; }
+      const qty = parseInt(document.getElementById('qty-input').value) || 1;
+      try {
+        await addToCart(user.id, productId, qty);
+        showMessage('Added to cart!', 'success');
+        updateCartCount();
+        bounceCartCount();
+      } catch { showMessage('Failed to add to cart', 'error'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavbar();
+      loadProduct();
+    });
+  </script>
+</body>
+</html>

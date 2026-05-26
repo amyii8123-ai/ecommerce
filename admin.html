@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Panel - ShopHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="index.html" class="logo">Shop<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search for products...">
+      <button onclick="window.location.href='index.html'">Search</button>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count-nav">0</span>)</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="message"></div>
+
+    <div class="admin-header">
+      <h1 class="page-title" style="margin-bottom:0;">Admin Panel</h1>
+      <button class="btn-primary" onclick="openModal()">+ Add Product</button>
+    </div>
+
+    <div id="admin-content">
+      <div class="loading">Loading products</div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div class="modal-overlay" id="product-modal">
+    <div class="modal">
+      <h2 id="modal-title">Add Product</h2>
+      <div class="form-group">
+        <label>Product Name</label>
+        <input type="text" id="p-name">
+      </div>
+      <div class="form-group">
+        <label>Price (₹)</label>
+        <input type="number" id="p-price" min="1">
+      </div>
+      <div class="form-group">
+        <label>Image URL</label>
+        <input type="text" id="p-image" placeholder="https://...">
+      </div>
+      <div class="form-group">
+        <label>Category</label>
+        <input type="text" id="p-category" placeholder="e.g. Electronics">
+      </div>
+      <div class="form-group">
+        <label>Rating (1-5)</label>
+        <input type="number" id="p-rating" min="1" max="5" step="0.1" value="4.0">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <textarea id="p-desc"></textarea>
+      </div>
+      <div style="display:flex;gap:0.5rem;">
+        <button class="btn-primary" id="modal-save-btn" onclick="saveProduct()">Save</button>
+        <button class="btn-danger" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 ShopHub. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    let editingId = null;
+
+    async function loadAdmin() {
+      const container = document.getElementById('admin-content');
+      if (!isAdmin()) { requireAdmin(); return; }
+
+      try {
+        const products = await apiGet('/products?_sort=id&_order=asc');
+        if (products.length === 0) {
+          container.innerHTML = '<div class="empty-state"><h2>No products yet</h2></div>';
+          return;
+        }
+
+        let html = `
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Image</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Rating</th>
+                <th>Stock</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+        `;
+        products.forEach(p => {
+          html += `
+            <tr>
+              <td>${p.id}</td>
+              <td><img src="${p.image}" alt="" onerror="this.src='https://via.placeholder.com/50?text=N/A'"></td>
+              <td>${p.name}</td>
+              <td>${p.category}</td>
+              <td>${formatPrice(p.price)}</td>
+              <td>${p.rating} ★</td>
+              <td>${p.inStock ? 'In Stock' : 'Out of Stock'}</td>
+              <td class="actions">
+                <button class="btn-secondary" style="padding:0.3rem 0.8rem;font-size:0.8rem;" onclick="editProduct(${p.id})">Edit</button>
+                <button class="btn-danger" style="padding:0.3rem 0.8rem;font-size:0.8rem;" onclick="deleteProductHandler(${p.id})">Delete</button>
+              </td>
+            </tr>
+          `;
+        });
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      } catch {
+        container.innerHTML = '<div class="empty-state"><h2>Error loading products</h2></div>';
+      }
+    }
+
+    function openModal(data) {
+      editingId = data ? data.id : null;
+      document.getElementById('modal-title').textContent = data ? 'Edit Product' : 'Add Product';
+      document.getElementById('p-name').value = data ? data.name : '';
+      document.getElementById('p-price').value = data ? data.price : '';
+      document.getElementById('p-image').value = data ? data.image : '';
+      document.getElementById('p-category').value = data ? data.category : '';
+      document.getElementById('p-rating').value = data ? data.rating : '4.0';
+      document.getElementById('p-desc').value = data ? data.description : '';
+      document.getElementById('product-modal').classList.add('open');
+    }
+
+    function closeModal() {
+      document.getElementById('product-modal').classList.remove('open');
+      editingId = null;
+    }
+
+    async function saveProduct() {
+      const name = document.getElementById('p-name').value.trim();
+      const price = parseFloat(document.getElementById('p-price').value);
+      const image = document.getElementById('p-image').value.trim();
+      const category = document.getElementById('p-category').value.trim();
+      const rating = parseFloat(document.getElementById('p-rating').value);
+      const description = document.getElementById('p-desc').value.trim();
+
+      if (!name || !price || !image || !category || !description) {
+        showMessage('Please fill all fields', 'error');
+        return;
+      }
+
+      const data = { name, price, image, category, rating, description, inStock: true };
+
+      try {
+        if (editingId) {
+          await updateProduct(editingId, data);
+          showMessage('Product updated!', 'success');
+        } else {
+          await createProduct(data);
+          showMessage('Product added!', 'success');
+        }
+        closeModal();
+        loadAdmin();
+      } catch {
+        showMessage('Failed to save product', 'error');
+      }
+    }
+
+    async function editProduct(id) {
+      try {
+        const p = await getProduct(id);
+        openModal(p);
+      } catch { showMessage('Failed to load product', 'error'); }
+    }
+
+    async function deleteProductHandler(id) {
+      if (!confirm('Delete this product?')) return;
+      try {
+        await deleteProduct(id);
+        showMessage('Product deleted!', 'success');
+        loadAdmin();
+      } catch { showMessage('Failed to delete product', 'error'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavbar();
+      loadAdmin();
+    });
+  </script>
+</body>
+</html>

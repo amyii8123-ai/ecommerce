@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Shopping Cart - ShopHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="home.html" class="logo">Shop<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search for products...">
+      <button onclick="window.location.href='index.html'">Search</button>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="home.html">Home</a>
+      <a href="index.html">Products</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count-nav">0</span>)</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="message"></div>
+    <h1 class="page-title">Shopping Cart</h1>
+
+    <div id="cart-content">
+      <div class="loading loading-dots">Loading cart</div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 ShopHub. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    async function loadCart() {
+      const user = getCurrentUser();
+      const container = document.getElementById('cart-content');
+
+      if (!user) {
+        container.innerHTML = '<div class="empty-state"><h2>Please login to view your cart</h2><p><a href="login.html?redirect=cart.html" style="color:#2874f0;">Login here</a></p></div>';
+        return;
+      }
+
+      try {
+        const items = await apiGet(`/cart?userId=${user.id}&_expand=product`);
+        if (items.length === 0) {
+          container.innerHTML = '<div class="empty-state"><h2>Your cart is empty</h2><p><a href="index.html" style="color:#2874f0;">Continue shopping</a></p></div>';
+          return;
+        }
+
+        let total = 0;
+        let html = '<div class="cart-items">';
+        items.forEach((item, i) => {
+          const price = item.product ? item.product.price : 0;
+          const itemTotal = price * item.quantity;
+          total += itemTotal;
+          html += `
+            <div class="cart-item reveal" id="cart-item-${item.id}" style="transition-delay:${i * 0.08}s">
+              <img src="${item.product ? item.product.image : ''}" alt="${item.product ? item.product.name : ''}" onerror="this.src='https://via.placeholder.com/80?text=No+Image'">
+              <div class="cart-item-info">
+                <h3>${item.product ? item.product.name : 'Unknown'}</h3>
+                <div class="cart-item-price">${formatPrice(price)}</div>
+              </div>
+              <div class="cart-qty">
+                <button onclick="changeQty(${item.id}, -1)">−</button>
+                <span id="qty-${item.id}">${item.quantity}</span>
+                <button onclick="changeQty(${item.id}, 1)">+</button>
+              </div>
+              <div class="cart-item-total">${formatPrice(itemTotal)}</div>
+              <button class="btn-danger" onclick="removeItem(${item.id})">Remove</button>
+            </div>
+          `;
+        });
+        html += '</div>';
+
+        html += `
+          <div class="cart-summary reveal" style="transition-delay:${items.length * 0.08}s">
+            <h3>Cart Summary</h3>
+            <div class="total">Total: <span id="cart-total">${formatPrice(total)}</span></div>
+            <button class="btn-secondary" onclick="window.location.href='checkout.html'">Proceed to Checkout</button>
+          </div>
+        `;
+
+        container.innerHTML = html;
+        observeReveal('.cart-item');
+        observeReveal('.cart-summary');
+        const totalEl = document.getElementById('cart-total');
+        if (totalEl) {
+          setTimeout(() => animateValue(totalEl, 0, total, 800), 400);
+        }
+      } catch {
+        container.innerHTML = '<div class="empty-state"><h2>Error loading cart</h2></div>';
+      }
+    }
+
+    async function changeQty(cartId, delta) {
+      const span = document.getElementById(`qty-${cartId}`);
+      let newQty = parseInt(span.textContent) + delta;
+      if (newQty < 1) { await removeItem(cartId); return; }
+      if (newQty > 10) newQty = 10;
+      try {
+        await updateCartItem(cartId, newQty);
+        loadCart();
+        updateCartCount();
+        bounceCartCount();
+      } catch { showMessage('Failed to update quantity', 'error'); }
+    }
+
+    async function removeItem(cartId) {
+      try {
+        await removeCartItem(cartId);
+        showMessage('Item removed from cart', 'success');
+        loadCart();
+        updateCartCount();
+        bounceCartCount();
+      } catch { showMessage('Failed to remove item', 'error'); }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavbar();
+      loadCart();
+    });
+  </script>
+</body>
+</html>

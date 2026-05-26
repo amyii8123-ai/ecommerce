@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - ShopHub</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="home.html" class="logo">Shop<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" placeholder="Search for products...">
+      <button onclick="window.location.href='index.html'">Search</button>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="home.html">Home</a>
+      <a href="index.html">Products</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count-nav">0</span>)</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="auth-form fade-in">
+      <h2>Create Account</h2>
+      <div id="message"></div>
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="name" placeholder="Enter your name">
+      </div>
+      <div class="form-group">
+        <label>Email</label>
+        <input type="email" id="email" placeholder="Enter your email">
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="password" placeholder="Create a password">
+      </div>
+      <button class="btn-primary" onclick="handleRegister()">Register</button>
+      <p>Already have an account? <a href="login.html">Login</a></p>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 ShopHub. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    async function handleRegister() {
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value.trim();
+      if (!name || !email || !password) { showMessage('Please fill all fields', 'error'); return; }
+      if (password.length < 6) { showMessage('Password must be at least 6 characters', 'error'); return; }
+      try {
+        await registerUser(name, email, password);
+        showMessage('Registration successful!', 'success');
+        setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+      } catch (err) {
+        showMessage(err.message, 'error');
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', updateNavbar);
+  </script>
+</body>
+</html>

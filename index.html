@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ShopHub - Online Shopping</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar">
+    <a href="home.html" class="logo">Shop<span>Hub</span></a>
+    <div class="search-bar">
+      <input type="text" id="search-input" placeholder="Search for products..." onkeyup="handleSearch(event)">
+      <button onclick="handleSearch()">Search</button>
+    </div>
+    <div class="nav-links" id="nav-links">
+      <a href="home.html">Home</a>
+      <a href="index.html">Products</a>
+      <a href="login.html">Login</a>
+      <a href="register.html">Register</a>
+      <a href="cart.html" class="cart-link">Cart (<span id="cart-count-nav">0</span>)</a>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div id="message"></div>
+
+    <h1 class="page-title">Products</h1>
+
+    <div class="category-filters" id="category-filters">
+      <button class="active" data-cat="All" onclick="filterCategory('All')">All</button>
+    </div>
+
+    <div class="product-grid" id="product-grid">
+      <div class="skeleton-grid" id="skeleton-grid">
+        <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line thumb"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line thumb"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line thumb"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line thumb"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line thumb"></div></div>
+        <div class="skeleton-card"><div class="skeleton-img"></div><div class="skeleton-line short"></div><div class="skeleton-line medium"></div><div class="skeleton-line thumb"></div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer">
+    <p>&copy; 2026 ShopHub. All rights reserved.</p>
+  </footer>
+
+  <script src="app.js"></script>
+  <script>
+    let currentCategory = 'All';
+    let currentSearch = '';
+
+    function handleSearch(e) {
+      if (e && e.key && e.key !== 'Enter') return;
+      currentSearch = document.getElementById('search-input').value.trim();
+      loadProducts();
+    }
+
+    function filterCategory(cat) {
+      currentCategory = cat;
+      document.querySelectorAll('#category-filters button').forEach(b => b.classList.toggle('active', b.dataset.cat === cat));
+      loadProducts();
+    }
+
+    async function loadProducts() {
+      const grid = document.getElementById('product-grid');
+      const skeleton = document.getElementById('skeleton-grid');
+      try {
+        const products = await getProducts(currentCategory, currentSearch);
+        if (skeleton) skeleton.style.display = 'none';
+        if (products.length === 0) {
+          grid.innerHTML = '<div class="empty-state"><h2>No products found</h2><p>Try a different search or category.</p></div>';
+          return;
+        }
+        grid.innerHTML = products.map(p => `
+          <div class="product-card" onclick="window.location.href='product.html?id=${p.id}'">
+            <div class="img-wrap">
+              ${p.rating >= 4.5 ? '<span class="sale-badge">HOT 🔥</span>' : p.rating >= 4 ? '<span class="sale-badge">SALE</span>' : ''}
+              <img src="${p.image}" alt="${p.name}" loading="lazy" onerror="this.src='https://via.placeholder.com/300?text=No+Image'">
+            </div>
+            <div class="info">
+              <h3>${p.name}</h3>
+              <div class="price" data-value="${p.price}">${formatPrice(p.price)}</div>
+              <div class="stock-badge ${p.inStock ? 'in-stock' : 'out-of-stock'}">
+                <span class="stock-dot ${p.inStock ? 'in-stock' : 'out-of-stock'}"></span>
+                ${p.inStock ? 'In Stock' : 'Out of Stock'}
+              </div>
+              <div class="rating"><span class="stars">${p.rating} ★</span> ${getStarHTML(p.rating)}</div>
+              <button class="add-btn" onclick="event.stopPropagation(); quickAdd(${p.id})" ${p.inStock ? '' : 'disabled'}>
+                ${p.inStock ? 'Add to Cart' : 'Out of Stock'}
+              </button>
+            </div>
+          </div>
+        `).join('');
+        observeReveal('.product-card');
+      } catch (err) {
+        if (skeleton) skeleton.style.display = 'none';
+        grid.innerHTML = `<div class="empty-state"><h2>Error loading products</h2><p>Make sure json-server is running on port 3000.</p></div>`;
+      }
+    }
+
+    async function quickAdd(productId) {
+      const user = getCurrentUser();
+      if (!user) { window.location.href = 'login.html?redirect=index.html'; return; }
+      try {
+        await addToCart(user.id, productId, 1);
+        showMessage('Added to cart!', 'success');
+        updateCartCount();
+        bounceCartCount();
+      } catch { showMessage('Failed to add to cart', 'error'); }
+    }
+
+    async function loadCategories() {
+      const cats = await getCategories();
+      const container = document.getElementById('category-filters');
+      cats.forEach(c => {
+        const btn = document.createElement('button');
+        btn.textContent = c;
+        btn.dataset.cat = c;
+        btn.onclick = () => filterCategory(c);
+        container.appendChild(btn);
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      updateNavbar();
+      loadCategories();
+      const params = new URLSearchParams(window.location.search);
+      const searchParam = params.get('search');
+      const catParam = params.get('category');
+      if (searchParam) {
+        document.getElementById('search-input').value = searchParam;
+        currentSearch = searchParam;
+      }
+      if (catParam) {
+        currentCategory = catParam;
+        document.querySelectorAll('#category-filters button').forEach(b => b.classList.toggle('active', b.dataset.cat === catParam));
+      }
+      loadProducts();
+    });
+  </script>
+</body>
+</html>
