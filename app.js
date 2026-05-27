@@ -13,7 +13,7 @@
   }
 })();
 
-const API = 'http://localhost:3000';
+const API = 'https://backendam.onrender.com';
 
 // ===== AUTH =====
 function getCurrentUser() {
